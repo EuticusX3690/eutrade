@@ -1,0 +1,68 @@
+name: Build Android APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get the files
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Copy the web files
+        run: |
+          mkdir -p www
+          ls -la
+          cp index.html style.css app.js manifest.webmanifest sw.js logo.png icon-192.png icon-512.png www/
+          ls -la www/
+
+      - name: Install Capacitor
+        run: |
+          npm init -y
+          npm install @capacitor/core@7 @capacitor/cli@7 @capacitor/android@7 @capacitor/filesystem@7 @capacitor/share@7
+
+      - name: Create the Android project
+        run: |
+          npx cap init Eutrade com.euticus.eutrade --web-dir=www
+          npx cap add android
+          npx cap sync android
+
+      - name: Use the Eutrade icon
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y imagemagick
+          RES=android/app/src/main/res
+          for pair in mdpi:48 hdpi:72 xhdpi:96 xxhdpi:144 xxxhdpi:192; do
+            name=${pair%%:*}
+            size=${pair##*:}
+            convert icon-512.png -resize ${size}x${size} $RES/mipmap-$name/ic_launcher.png
+            cp $RES/mipmap-$name/ic_launcher.png $RES/mipmap-$name/ic_launcher_round.png
+          done
+          rm -rf $RES/mipmap-anydpi-v26
+
+      - name: Build the APK
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --stacktrace
+
+      - name: Save the APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Eutrade-APK
+          path: android/app/build/outputs/apk/debug/app-debug.apk
