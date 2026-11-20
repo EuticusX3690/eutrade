@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0d1226">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Eutrade">
+<meta name="description" content="Eutrade: a trade calculator and journal">
+<title>Eutrade</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main>
+<h1><img class="logo" alt="" src="logo.png"><span>Eutrade</span></h1>
+<nav class="tabs" id="tabs">
+<button type="button" data-t="calc" class="on"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 12h2M14 12h2M8 16h2M14 16h2"/></svg><span>Calc</span></button>
+<button type="button" data-t="journal"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3V4z"/><path d="M9 8h6M9 12h6"/></svg><span>Journal</span></button>
+<button type="button" data-t="stats"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 20V10M12 20V4M19 20v-7"/></svg><span>Stats</span></button>
+<button type="button" data-t="backup"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/></svg><span>More</span></button>
+</nav>
+<div class="tab jr" id="t-calc">
+
+<label for="pair">Pair</label>
+<select id="pair">
+<option>EURUSD</option><option>GBPUSD</option><option>AUDUSD</option><option>NZDUSD</option>
+<option>USDJPY</option><option>USDCHF</option><option>USDCAD</option><option>XAUUSD</option>
+<option>EURJPY</option><option>GBPJPY</option><option>EURGBP</option>
+</select>
+
+<label for="entry">Entry price</label>
+<input id="entry" inputmode="decimal" placeholder="1.08500" autocomplete="off">
+
+<div class="side">
+<button type="button" id="buy" class="buy on">Buy</button>
+<button type="button" id="sell" class="sell">Sell</button>
+</div>
+
+<label for="level" id="levelLbl">Support price</label>
+<input id="level" inputmode="decimal" placeholder="1.08300" autocomplete="off">
+
+<div class="row">
+<div><label for="buf">Buffer (pips)</label><input id="buf" inputmode="decimal" placeholder="10" autocomplete="off"></div>
+<div><label for="rr">Reward for each 1 risked</label><input id="rr" inputmode="decimal" placeholder="2" autocomplete="off"></div>
+</div>
+<div class="row">
+<div><label for="ownsl">My own SL price (optional)</label><input id="ownsl" inputmode="decimal" placeholder="leave empty" autocomplete="off"></div>
+<div><label for="owntp">My own TP price (optional)</label><input id="owntp" inputmode="decimal" placeholder="leave empty" autocomplete="off"></div>
+</div>
+
+<div class="row">
+<div><label for="bal">Account balance ($)</label><input id="bal" inputmode="decimal" placeholder="100" autocomplete="off"></div>
+<div><label for="rp">Risk per trade (%)</label><input id="rp" inputmode="decimal" placeholder="1" autocomplete="off"></div>
+</div>
+<label for="lots">Lot size (leave empty to calculate it)</label>
+<input id="lots" inputmode="decimal" placeholder="auto" autocomplete="off">
+<label for="nxt" id="nxtLbl">Next resistance in the way (optional)</label>
+<input id="nxt" inputmode="decimal" placeholder="1.08900" autocomplete="off">
+<div class="row">
+<div><label for="spr">Spread (pips, auto)</label><input id="spr" inputmode="decimal" placeholder="1" autocomplete="off"></div>
+<div><label for="atr">ATR from MT5 (optional)</label><input id="atr" inputmode="decimal" placeholder="0.0008" autocomplete="off"></div>
+</div>
+
+<div id="pv">
+<label for="pipval">Pip value in $ for 1 lot (check your broker)</label>
+<input id="pipval" inputmode="decimal" placeholder="7" autocomplete="off">
+</div>
+
+<div class="out" id="out">
+<div class="line"><span>Stop loss price</span><b id="rSL">–</b></div>
+<div class="line"><span>Stop loss distance</span><b id="rPips">–</b></div>
+<div class="line"><span>Take profit price</span><b id="rTP">–</b></div>
+<div class="line"><span>Risk : Reward</span><b id="rRR">–</b></div>
+<div class="line"><span>Lot size</span><b id="rLots">–</b></div>
+<div class="line"><span>Risk per 1 lot</span><b id="rPerLot">–</b></div>
+<div class="line"><span>Spread used</span><b id="rSpr">–</b></div>
+<div class="line"><span>You risk</span><b id="rRisk" class="loss">–</b></div>
+<div class="line"><span>You can win</span><b id="rWin" class="win">–</b></div>
+</div>
+<p class="hint" id="warn"></p>
+<p class="hint" id="hint">Fill in the boxes above and the answers appear here.</p>
+<h2>Save this trade</h2>
+<label for="strat">Strategy name</label>
+<input id="strat" list="stratList" placeholder="e.g. Support bounce" autocomplete="off">
+<datalist id="stratList"></datalist>
+<label for="why">Why did you enter?</label>
+<textarea id="why" rows="3" placeholder="What did you see on the chart?"></textarea>
+<label for="trend">Market trend</label>
+<select id="trend"><option value="">Not sure yet</option><option value="up">Up trend</option><option value="down">Down trend</option><option value="side">Sideways</option></select>
+<label for="shot">Screenshots (optional)</label>
+<input id="shot" type="file" accept="image/*" multiple>
+<label for="shotKind">When was the screenshot taken?</label>
+<select id="shotKind"><option value="entry">At entry</option><option value="before">Before entry</option><option value="after">After entry</option><option value="close">At close</option></select>
+<button type="button" id="saveBtn" class="big">Save trade</button>
+<p class="hint" id="saveMsg"></p>
+<button type="button" id="askShortcut" class="ghost">Ask the AI about this setup</button>
+</div>
+<div class="tab jr" id="t-stats" hidden>
+<h2>Win rate by strategy</h2>
+<select id="sfS"></select>
+<div id="stats"></div>
+</div>
+<div class="tab jr" id="t-journal" hidden>
+<h2>My journal</h2>
+<select id="sfJ"></select>
+<div class="filters" id="filters"></div>
+<div id="list"></div>
+<div id="more"></div>
+</div>
+<div class="tab jr" id="t-backup" hidden>
+<button type="button" id="installBtn" class="big" hidden>Install Eutrade as an app</button>
+<h2>Ask the AI</h2>
+<p class="hint">Stuck or unsure? Ask a question. The AI answers in simple words.</p>
+<textarea id="askQ" rows="3" placeholder="Example: Should I sell here, or wait for a candle to close?"></textarea>
+<label class="chk"><input type="checkbox" id="askCalc" checked> Include my current calculation</label>
+<label class="chk"><input type="checkbox" id="askStats" checked> Include my recent results</label>
+<button type="button" id="askBtn" class="big">Ask</button>
+<div id="askOut"></div>
+
+<h2>Backup</h2>
+<p class="hint">Tap Make backup, then paste the text into a note or WhatsApp to yourself. To restore, paste it in the box and tap Restore.</p>
+<textarea id="bkText" rows="4" placeholder="Backup text goes here"></textarea>
+<div class="row">
+<button type="button" id="bkMake" class="big">Make backup</button>
+<button type="button" id="bkRestore" class="big">Restore</button>
+</div>
+<p class="hint" id="bkMsg"></p>
+<h2>Export and import</h2>
+<p class="hint">Export saves all your trades with their screenshots in one file, ready for a future trading bot. Import loads such a file back, screenshots included.</p>
+<button type="button" id="exMake" class="big">Export everything</button>
+<p class="hint" id="exMsg"></p>
+<input type="file" id="impFile" accept=".json,application/json">
+<button type="button" id="impBtn" class="big">Import export file</button>
+<p class="hint" id="impMsg"></p>
+
+<div id="aiSettings">
+<h2>AI settings</h2>
+<p class="hint" id="aiState"></p>
+<label for="apiKey">Anthropic API key</label>
+<input id="apiKey" type="password" autocomplete="off" placeholder="sk-ant-...">
+<label for="apiModel">Model</label>
+<input id="apiModel" autocomplete="off" placeholder="claude-sonnet-5-5">
+<div class="row">
+<button type="button" id="keySave" class="big">Save</button>
+<button type="button" id="keyDel" class="big">Remove key</button>
+</div>
+<p class="hint" id="aiMsg"></p>
+<p class="hint">Your key stays only in this browser. It is never inside the app files. Use a key with a low spending limit. Without a key, the app copies your question so you can paste it into Claude.</p>
+</div>
+</div>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>
